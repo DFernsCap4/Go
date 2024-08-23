@@ -1,24 +1,33 @@
 package database
 
-import(
-	"database/sql"
+import (
+	"example/web-service-gin/models"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
+	"log"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
-var DB *sql.DB
+var DB *gorm.DB
 
 func Connect() error {
-	dsn := "root:@tcp(127.0.0.2:3306)/go"
-	db, err := sql.Open("mysql", dsn)
+	dsn := fmt.Sprintf(
+		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		"root",
+		"",
+		"127.0.0.1",
+		"3306",
+		"go",
+	)
+
+
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		return err
+		log.Fatal("Failed to connect to database:", err)
 	}
 
-	if err := db.Ping(); err != nil {
-		return err
-	}
+	db.AutoMigrate(&models.Album{})
 
 	DB = db
 	fmt.Println("Connected to the database succesfully")
